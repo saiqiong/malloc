@@ -11,8 +11,11 @@
 /* ************************************************************************** */
 
 #include "../includes/malloc.h"
- 
- void 	*allocate_memory(t_zone *zone, size_t size)
+ void	*allocate_zone(t_zone **zone, int type)
+ {
+ }
+
+ void 	*allocate_memory(t_zone *zone, size_t size, int malloc_type)
  {
 
  }
@@ -27,4 +30,5 @@
 		malloc_type = SMALL;
 	else
 		malloc_type = LARGE;
+	return allocate_memory(map[malloc_type].zone, size, malloc_type);
  }
