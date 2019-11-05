@@ -39,6 +39,7 @@ typedef struct s_zone
 {
 	char 	*addr;
 	struct 	s_zone *next;
+	struct	s_zone *pre;
 	t_block *block_list;
 }		t_zone;
 
@@ -47,6 +48,7 @@ typedef struct s_map
 	t_zone *zone;
 }		t_map;
 
+#define METABLOCK_SIZE sizeof(t_block)
 extern t_map map[MAP_NUMBER];
 
 void	ft_free(void *ptr);

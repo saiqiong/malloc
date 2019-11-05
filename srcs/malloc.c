@@ -10,13 +10,39 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <sys/mman.h>
+#include <unistd.h>
 #include "../includes/malloc.h"
- void	*allocate_zone(t_zone **zone, int type)
+ void	allocate_zone(t_zone **zone, int type)
  {
+	 int	max_block;
+	 int	zone_size;
+	 char	*address;
+
+	if (type == TINY)
+	 	max_block = MAX_TINY_BLOCK;
+	else
+		max_block = MAX_SMALL_BLOCK;
+	zone_size = ( max_block + METABLOCK_SIZE ) * 100 % getpagesize() ? (max_block + METABLOCK_SIZE ) * 100 : (max_block + METABLOCK_SIZE ) * 100 + getpagesize();
+	address = (t_zone *)mmap(0, zone_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	if (address == MAP_FAILED){
+		// TODO mmap failed
+	}
+	*zone = address;
+	(*zone)->addr = address;
+	(*zone)->next = NULL;
+	(*zone)->pre = NULL;
+	(*zone)->block_list = 
+	//TODO NOT YET FOR LARGE ZONE
  }
 
+// void	*allocate()
  void 	*allocate_memory(t_zone *zone, size_t size, int malloc_type)
  {
+	 if (!zone)
+	 	allocate_zone(&zone, malloc_type);
+	
+
 
  }
  
