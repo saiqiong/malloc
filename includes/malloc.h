@@ -48,8 +48,14 @@ typedef struct s_map
 	t_zone *zone;
 }		t_map;
 
+// typedef struct number
+// {
+// 	int a;
+// 	int b;
+// }			t_number;
 #define METABLOCK_SIZE sizeof(t_block)
-extern t_map map[MAP_NUMBER];
+t_map map[MAP_NUMBER];
+int	 test_number;
 
 void	ft_free(void *ptr);
 void	*ft_malloc(size_t size);
