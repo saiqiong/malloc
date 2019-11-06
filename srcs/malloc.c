@@ -55,6 +55,7 @@ void 	init_new_zone(t_zone *new_zone, char *address, int zone_size, int type)
 	new_zone->block_list = (t_block *)(address + METAZONE_SIZE);
 	new_zone->block_list->addr = address + METABLOCK_SIZE +  METAZONE_SIZE;
 	*(new_zone->block_list->addr - 1) = BEGIN_AND_END; // mark this block as the begining and end of a zone
+	printf("new_zone flag%d\n", (int)*(new_zone->block_list->addr - 1));
 
 	new_zone->block_list->next = NULL;
 	new_zone->block_list->pre = NULL;
@@ -117,12 +118,15 @@ void	seperate_block(t_block *fit_block, size_t size)
 	rest->addr = fit_block->addr + size + METABLOCK_SIZE;
 	rest->size = fit_block->size - size - METABLOCK_SIZE;
 	fit_block->size = size;
+	*(rest->addr - 1) = *(fit_block->addr -1 );
 	*(fit_block->addr - 1) = *(fit_block->addr - 1) & NOT_END;
 	*(rest->addr - 1) = *(rest->addr -1 ) & NOT_BEGIN;
 	fit_block->is_free = USED;
 	fit_block->next = rest;
 	rest->pre = fit_block;
 	rest->next = temp;
+	printf("fit_block flag%d\n", *(fit_block->addr - 1));
+	printf("rest flag%d\n", *(rest->addr - 1));
 	if (temp)
 		temp->pre = rest;
 }
@@ -262,6 +266,7 @@ void	ft_free(void *ptr)
 
 int main()
 {
+/*
 	char *test = ft_malloc(6);
 	test[0] = 's';
 	test[1] = 'a';
@@ -281,8 +286,8 @@ int main()
 	char *test3;
 	// ft_free(test2);
 	ft_free(test);
-	ft_free(test11);
 	ft_free(test2);
+	ft_free(test6);
 	// ft_free(test11);
 	printf("block size %lu\n", METABLOCK_SIZE);
 	printf("size of pointer=%lu, size size_t=%lu, size int=%lu\n", sizeof(test3), sizeof(size_t), sizeof(int));
@@ -291,5 +296,6 @@ int main()
 	
 
 	// printf("test is %s test number is %d\n", test, test_number);
+	// */
 	show_alloc_mem();
 }
