@@ -22,6 +22,13 @@
 # define TINY 0
 # define SMALL 1
 # define LARGE 2
+# define NOT_TINY 254
+# define NOT_END 253
+# define BEGIN 1 // mark a block if it's beginning of a zone
+# define END 2 // mark a block if it's end of a zone
+# define NOT_BEGIN 254
+# define NOT_END 253
+# define BEGIN_AND_END 3
 # define MAX_TINY_BLOCK 64
 # define MAX_SMALL_BLOCK 2048
 
@@ -41,6 +48,7 @@ typedef struct s_zone
 	struct 	s_zone *next;
 	struct	s_zone *pre;
 	t_block *block_list;
+	int		type;
 }		t_zone;
 
 typedef struct s_map
@@ -48,14 +56,10 @@ typedef struct s_map
 	t_zone *zone;
 }		t_map;
 
-// typedef struct number
-// {
-// 	int a;
-// 	int b;
-// }			t_number;
 #define METABLOCK_SIZE sizeof(t_block)
+#define METAZONE_SIZE sizeof(t_zone)
+
 t_map map[MAP_NUMBER];
-int	 test_number;
 
 void	ft_free(void *ptr);
 void	*ft_malloc(size_t size);
