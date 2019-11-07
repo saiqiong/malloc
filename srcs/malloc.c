@@ -162,6 +162,21 @@ void *allocate_in_block(t_zone *zone, size_t size, int malloc_type)
 	}
 }
 
+void	*debug_infor(char *addr, size_t size, char *type)
+{
+	char	*debug_env;
+
+	debug_env = getenv("MALLOCDEBUG");
+	if (debug_env && (!ft_strcmp(debug_env, "true") || !ft_strcmp(debug_env, "TRUE"))) {
+		if (!addr)
+			ft_printf("Opps! %s failed\n", type);
+		else {
+			ft_printf("%s from address: %p %zu bytes\n", type, addr, size);
+		}
+	}
+	return addr;
+}
+
 void *ft_malloc(size_t size)
 {
 	int malloc_type;
@@ -177,21 +192,7 @@ void *ft_malloc(size_t size)
 	pthread_mutex_lock(&mutex1);
 	res = allocate_in_block(map[malloc_type].zone, ALIGHN(size), malloc_type);
 	pthread_mutex_unlock(&mutex1);
-	return res;
-}
-
-void	debug_infor(char *addr, size_t size, char *type)
-{
-	char	*debug_env;
-
-	debug_env = getenv("MALLOCDEBUG");
-	if (ft_strcmp(debug_env, "true") || ft_strcmp(debug_env, "TRUE")) {
-		if (!addr)
-			ft_printf("Opps! %s failed\n", type);
-		else {
-			ft_printf("%s from address: %p %zu bytes\n", type, addr, size);
-		}
-	}
+	return debug_infor(res, ALIGHN(size), "Malloced");
 }
 
 void show_alloc_mem()
@@ -291,10 +292,13 @@ void ft_free(void *ptr)
 		block = (t_block *)((char *)ptr - METABLOCK_SIZE);
 		if (block && block->is_free == USED)
 		{
+			debug_infor(block->addr, block->size, "Freed");
 			block->is_free = FREE;
 			merge_free(block);
 			free_zone(block);
 		}
+	} else {
+		debug_infor(NULL, 0, "Free");
 	}
 }
 
@@ -305,7 +309,7 @@ void *ft_realloc(void *ptr, size_t size)
 	char temp[((t_block *)((char *)ptr - METABLOCK_SIZE))->size];
 
 	if (!ptr)
-		return NULL;
+		return debug_infor(NULL, 0, "Realloc");
 	allocated_size = ((t_block *)((char *)ptr - METABLOCK_SIZE))->size;
 	if (allocated_size >= (size_t)(ALIGHN(size)))
 		return ptr;
@@ -313,12 +317,14 @@ void *ft_realloc(void *ptr, size_t size)
 	ft_free(ptr);
 	addr = ft_malloc(size);
 	ft_memmove(addr, temp, allocated_size);
-	return (void *)addr;
+	return addr;
 }
 
 int main()
 {
-	// char *test = ft_malloc(16);
+	 char *test = ft_malloc(16);
+	 ft_realloc(test, 20);
+	 ft_free(test);
 	// // test[0] = 's';
 	// // test[1] = 'a';
 	// // test[2] = 'l';
@@ -329,7 +335,6 @@ int main()
 	// char *test2 = ft_malloc(100);
 	// show_alloc_mem();
 	// ft_realloc(test, 50);
-	debug_infor();
 	show_alloc_mem();
 
 	// char *test3 = ft_malloc(1000);
