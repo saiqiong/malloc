@@ -27,6 +27,12 @@ LIBFT_PATH      := libft/
 LIBFT_INCLUDES  := -I libft/includes
 LIBFT           := -L $(LIBFT_PATH) -lft
 
+LIBFTPRINTF_PATH = libft/ft_printf
+LIBFTPRINTF_INCLUDE = -I$(LIBFTPRINTF_PATH)/includes
+LIBFTPRINTF = -L$(LIBFTPRINTF_PATH) -lftprintf
+
+
+
 .PHONY: all libft clean fclean re
 
 all: libft $(NAME)
@@ -34,12 +40,12 @@ all: libft $(NAME)
 libft:
 	@make -C $(LIBFT_PATH)
 
-$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/libft.a
+$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/libft.a $(LIBFT_PATH)/libftprintf.a
 	@mkdir $(OBJS_PATH) 2> /dev/null || true
-	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
+	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) $(LIBFTPRINTF_INCLUDE) -o $@ -c $<
 
 $(NAME): $(OBJS)
-	@$(CC) -shared $(OBJS) -o $(FULLNAME) $(LIBFT)
+	@$(CC) -shared $(OBJS) -o $(FULLNAME) $(LIBFT) $(LIBFTPRINTF)
 	@ln -fs $(FULLNAME) $@
 	@echo "$(NAME):\033[92m linked\033[0m"
 

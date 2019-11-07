@@ -13,6 +13,7 @@
 #ifndef MALLOC_H
 # define MALLOC_H
 #include <stdlib.h>
+#include <pthread.h>
 #include <stddef.h>
 #include "../libft/libft.h"
 
@@ -22,8 +23,6 @@
 # define TINY 0
 # define SMALL 1
 # define LARGE 2
-# define NOT_TINY 254
-# define NOT_END 253
 # define BEGIN 1 // mark a block if it's beginning of a zone
 # define END 2 // mark a block if it's end of a zone
 # define NOT_BEGIN 254
@@ -31,6 +30,7 @@
 # define BEGIN_AND_END 3
 # define MAX_TINY_BLOCK 64
 # define MAX_SMALL_BLOCK 2048
+# define ALIGHN(size) size % 8 ? (size_t)(size + 8 - (size % 8)) : size
 
 typedef struct s_block
 {
@@ -39,7 +39,6 @@ typedef struct s_block
 	struct s_block 	*pre;
 	size_t		size;
 	int		is_free;
-	
 }		t_block;
 
 typedef struct s_zone
@@ -59,6 +58,7 @@ typedef struct s_map
 #define METABLOCK_SIZE sizeof(t_block)
 #define METAZONE_SIZE sizeof(t_zone)
 
+pthread_mutex_t map_mutex;
 t_map map[MAP_NUMBER];
 
 void	ft_free(void *ptr);
