@@ -58,11 +58,12 @@ typedef struct s_map
 #define METABLOCK_SIZE sizeof(t_block)
 #define METAZONE_SIZE sizeof(t_zone)
 
-pthread_mutex_t map_mutex;
-t_map map[MAP_NUMBER];
+pthread_mutex_t g_map_mutex = PTHREAD_MUTEX_INITIALIZER;
+t_map g_map[MAP_NUMBER];
 
 void	ft_free(void *ptr);
 void	*ft_malloc(size_t size);
 void	*ft_realloc(void *ptr, size_t size);
+void	*ft_calloc(size_t count, size_t size);
 
 #endif

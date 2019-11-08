@@ -12,7 +12,6 @@
 
 #include <sys/mman.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <stdlib.h> // to be deleted
 #include "../includes/malloc.h"
 
@@ -28,14 +27,14 @@ void connect_block(t_zone *zone, t_zone *next)
 	next->block_list->pre = cp;
 }
 
-int calculate_zone_size(int type, size_t size)
+size_t calculate_zone_size(int type, size_t size)
 {
 	int max_block;
-	int zone_size;
+	size_t zone_size;
 
 	if (type == LARGE)
 	{
-		zone_size = (size + METABLOCK_SIZE + METAZONE_SIZE) % getpagesize() ? size + METABLOCK_SIZE + METAZONE_SIZE + (getpagesize() - size - METABLOCK_SIZE - METAZONE_SIZE) : size + METABLOCK_SIZE + METAZONE_SIZE;
+		zone_size = (size + METABLOCK_SIZE + METAZONE_SIZE) % getpagesize() ? size + METABLOCK_SIZE + METAZONE_SIZE + getpagesize() - ((size + METABLOCK_SIZE + METAZONE_SIZE) % getpagesize()) : size + METABLOCK_SIZE + METAZONE_SIZE;
 	}
 	else
 	{
@@ -43,8 +42,9 @@ int calculate_zone_size(int type, size_t size)
 			max_block = MAX_TINY_BLOCK;
 		else
 			max_block = MAX_SMALL_BLOCK;
-		zone_size = ((max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE) % getpagesize() ? (max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE + (getpagesize() - (max_block + METABLOCK_SIZE) * 100 - METAZONE_SIZE) : (max_block + METABLOCK_SIZE) * 100 + +METAZONE_SIZE;
+		zone_size = ((max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE) % getpagesize() ? (max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE + getpagesize() - ((max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE) % getpagesize() : (max_block + METABLOCK_SIZE) * 100 + +METAZONE_SIZE;
 	}
+	ft_printf("zone size is %zu\n", zone_size);
 	return zone_size;
 }
 
@@ -56,7 +56,6 @@ void init_new_zone(t_zone *new_zone, char *address, int zone_size, int type)
 	new_zone->block_list = (t_block *)(address + METAZONE_SIZE);
 	new_zone->block_list->addr = address + METABLOCK_SIZE + METAZONE_SIZE;
 	*(new_zone->block_list->addr - 1) = BEGIN_AND_END; // mark this block as the begining and end of a zone
-	printf("new_zone flag%d\n", (int)*(new_zone->block_list->addr - 1));
 
 	new_zone->block_list->next = NULL;
 	new_zone->block_list->pre = NULL;
@@ -67,7 +66,7 @@ void init_new_zone(t_zone *new_zone, char *address, int zone_size, int type)
 
 int allocate_zone(t_zone *zone, int type, size_t size)
 {
-	int zone_size;
+	size_t zone_size;
 	char *address;
 	t_zone *new_zone;
 
@@ -78,7 +77,7 @@ int allocate_zone(t_zone *zone, int type, size_t size)
 	new_zone = (t_zone *)address;
 	init_new_zone(new_zone, address, zone_size, type);
 	if (!zone)
-		(map + type)->zone = new_zone;
+		(g_map + type)->zone = new_zone;
 	else
 	{
 		zone->next = new_zone;
@@ -144,7 +143,7 @@ void *allocate_in_block(t_zone *zone, size_t size, int malloc_type)
 	{
 		if (allocate_zone(zone, malloc_type, size))
 			return NULL;
-		return allocate_in_block((map + malloc_type)->zone, size, malloc_type);
+		return allocate_in_block((g_map + malloc_type)->zone, size, malloc_type);
 	}
 	fit_block = find_block(zone->block_list, size, malloc_type);
 	if (fit_block)
@@ -162,17 +161,16 @@ void *allocate_in_block(t_zone *zone, size_t size, int malloc_type)
 	}
 }
 
-void	*debug_infor(char *addr, size_t size, char *type)
+void *debug_infor(char *addr, size_t size, char *type)
 {
-	char	*debug_env;
-
+	char *debug_env;
 	debug_env = getenv("MALLOCDEBUG");
-	if (debug_env && (!ft_strcmp(debug_env, "true") || !ft_strcmp(debug_env, "TRUE"))) {
+	if (debug_env && (!ft_strcmp(debug_env, "true") || !ft_strcmp(debug_env, "TRUE")))
+	{
 		if (!addr)
 			ft_printf("Opps! %s failed\n", type);
-		else {
+		else
 			ft_printf("%s from address: %p %zu bytes\n", type, addr, size);
-		}
 	}
 	return addr;
 }
@@ -181,7 +179,6 @@ void *ft_malloc(size_t size)
 {
 	int malloc_type;
 	void *res;
-	pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
 	if (size <= MAX_TINY_BLOCK)
 		malloc_type = TINY;
@@ -189,13 +186,50 @@ void *ft_malloc(size_t size)
 		malloc_type = SMALL;
 	else
 		malloc_type = LARGE;
-	pthread_mutex_lock(&mutex1);
-	res = allocate_in_block(map[malloc_type].zone, ALIGHN(size), malloc_type);
-	pthread_mutex_unlock(&mutex1);
-	return debug_infor(res, ALIGHN(size), "Malloced");
+	pthread_mutex_lock(&g_map_mutex);
+	res = allocate_in_block(g_map[malloc_type].zone, ALIGHN(size), malloc_type);
+	pthread_mutex_unlock(&g_map_mutex);
+	return debug_infor(res, ((t_block *)((char *)res - METABLOCK_SIZE))->size, "Malloced");
+}
+
+void print_block(t_block *list, size_t *total)
+{
+	if (list->is_free == USED)
+	{
+		ft_printf("%p - %p : %zu bytes\n", list->addr, list->addr + list->size, list->size);
+		*total = *total + list->size;
+	}
 }
 
 void show_alloc_mem()
+{
+	int i;
+	t_block *list;
+	char *type;
+	size_t total;
+
+	i = -1;
+	type = "TINY";
+	total = 0;
+	while (++i < MAP_NUMBER)
+	{
+		if (i)
+			type = (i == 1 ? "SMALL" : "LARGE");
+		if (g_map[i].zone)
+		{
+			ft_printf("%s : %p\n", type, g_map[i].zone->addr);
+			list = (g_map[i].zone)->block_list;
+			while (list)
+			{
+				print_block(list, &total);
+				list = list->next;
+			}
+		}
+	}
+	ft_printf("Total : %zu bytes\n", total);
+}
+
+void show_alloc_mem_ex()
 {
 	int i;
 	t_block *list;
@@ -203,25 +237,19 @@ void show_alloc_mem()
 	char *type;
 
 	i = -1;
+	type = "TINY";
 	while (++i < MAP_NUMBER)
 	{
-		if (!i)
-			type = "TINY";
-		else if (i == 1)
-			type = "SMALL";
-		else
-			type = "LARGE";
-		if (map[i].zone)
+		if (i)
+			type = (i == 1 ? "SMALL" : "LARGE");
+		if (g_map[i].zone)
 		{
-			ft_printf("%s : %p\n", type, map[i].zone->addr);
-			list = (map[i].zone)->block_list;
+			ft_printf("%s : %p\n", type, g_map[i].zone->addr);
+			list = (g_map[i].zone)->block_list;
 			while (list)
 			{
-				if (list->is_free == FREE)
-					free = "free";
-				else
-					free = "used";
-				ft_printf("%p - %p : %d bytes %s\n", list->addr, list->addr + list->size - 1, (int)list->size, free);
+				free = (list->is_free == FREE ? "free" : "used");
+				ft_printf("%p - %p : %zu bytes %s\n", list->addr, list->addr + list->size, list->size, free);
 				list = list->next;
 			}
 		}
@@ -234,6 +262,7 @@ void merge_free(t_block *block_list)
 
 	if (block_list->pre && block_list->pre->is_free == FREE)
 	{
+		ft_printf("in merge free 00000000000000\n");
 		temp = block_list->next;
 		block_list->pre->size = block_list->pre->size + METABLOCK_SIZE + block_list->size;
 		block_list->pre->next = temp;
@@ -244,6 +273,8 @@ void merge_free(t_block *block_list)
 	}
 	if (block_list->next && block_list->next->is_free == FREE)
 	{
+		ft_printf("in merge free 00000000000000\n");
+
 		temp = block_list->next->next;
 		block_list->size = block_list->size + METABLOCK_SIZE + block_list->next->size;
 		*(block_list->addr - 1) = (*(block_list->addr - 1) & NOT_END) | (*(block_list->next->addr - 1) & END);
@@ -258,9 +289,7 @@ void free_zone(t_block *block)
 	t_block *cp;
 	t_zone *zone;
 
-	cp = block;
-	if (block->pre)
-		cp = block->pre;
+	cp = block->pre ? block->pre : block;
 	if (cp->is_free == FREE && (*(cp->addr - 1) & BEGIN_AND_END) == BEGIN_AND_END)
 	{
 		zone = (t_zone *)(cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
@@ -268,7 +297,7 @@ void free_zone(t_block *block)
 		{
 			if (!zone->pre)
 			{
-				(map + zone->type)->zone = zone->next;
+				(g_map + zone->type)->zone = zone->next;
 				if (zone->next)
 					zone->next->pre = NULL;
 			}
@@ -287,6 +316,7 @@ void ft_free(void *ptr)
 {
 	t_block *block;
 
+	pthread_mutex_lock(&g_map_mutex);
 	if (ptr)
 	{
 		block = (t_block *)((char *)ptr - METABLOCK_SIZE);
@@ -297,9 +327,24 @@ void ft_free(void *ptr)
 			merge_free(block);
 			free_zone(block);
 		}
-	} else {
-		debug_infor(NULL, 0, "Free");
+		else
+			debug_infor(NULL, 0, "Free");
 	}
+	else
+		debug_infor(NULL, 0, "Free");
+	pthread_mutex_unlock(&g_map_mutex);
+}
+
+void *ft_calloc(size_t count, size_t size)
+{
+	void *res;
+
+	res = ft_malloc(count * size);
+	if (res)
+	{
+		ft_bzero(res, ALIGHN(count * size));
+	}
+	return res;
 }
 
 void *ft_realloc(void *ptr, size_t size)
@@ -322,9 +367,15 @@ void *ft_realloc(void *ptr, size_t size)
 
 int main()
 {
-	 char *test = ft_malloc(16);
-	 ft_realloc(test, 20);
-	 ft_free(test);
+	char *test = ft_malloc(30);
+	// char *test1 = ft_malloc(5000);
+	// char *test2 = ft_malloc(5000);
+	ft_free(test);
+	ft_free(test);
+
+
+	//  ft_realloc(test, 20);
+	//  ft_free(test);
 	// // test[0] = 's';
 	// // test[1] = 'a';
 	// // test[2] = 'l';
@@ -336,6 +387,7 @@ int main()
 	// show_alloc_mem();
 	// ft_realloc(test, 50);
 	show_alloc_mem();
+	show_alloc_mem_ex();
 
 	// char *test3 = ft_malloc(1000);
 	// char *test4 = ft_malloc(3000);
