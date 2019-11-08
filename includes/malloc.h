@@ -15,7 +15,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stddef.h>
-#include "../libft/libft.h"
+#include "../libft/include/libft.h"
+#include "../libft/include/ft_printf.h"
+
 
 # define FREE 0
 # define USED 1
@@ -28,9 +30,9 @@
 # define NOT_BEGIN 254
 # define NOT_END 253
 # define BEGIN_AND_END 3
-# define MAX_TINY_BLOCK 64
+# define MAX_TINY_BLOCK 256
 # define MAX_SMALL_BLOCK 2048
-# define ALIGHN(size) size % 8 ? (size_t)(size + 8 - (size % 8)) : size
+# define ALIGHN(size) size % 16 ? (size_t)(size + 16 - (size % 16)) : size
 
 typedef struct s_block
 {
@@ -38,6 +40,7 @@ typedef struct s_block
 	struct s_block 	*next;
 	struct s_block 	*pre;
 	size_t		size;
+	char		*test;
 	int		is_free;
 }		t_block;
 
@@ -47,6 +50,7 @@ typedef struct s_zone
 	struct 	s_zone *next;
 	struct	s_zone *pre;
 	t_block *block_list;
+	char	*test;
 	int		type;
 }		t_zone;
 
@@ -58,12 +62,25 @@ typedef struct s_map
 #define METABLOCK_SIZE sizeof(t_block)
 #define METAZONE_SIZE sizeof(t_zone)
 
-pthread_mutex_t g_map_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_map_mutex = PTHREAD_MUTEX_INITIALIZER;
+// static t_map g_map[MAP_NUMBER] = {(const t_map) {0}, (const t_map){0}, (const t_map){0}};
 t_map g_map[MAP_NUMBER];
 
-void	ft_free(void *ptr);
-void	*ft_malloc(size_t size);
-void	*ft_realloc(void *ptr, size_t size);
-void	*ft_calloc(size_t count, size_t size);
 
+/* free.c */
+void	free(void *ptr);
+
+void	*malloc(size_t size);
+
+/* realloc.c */
+void	*realloc(void *ptr, size_t size);
+void	*calloc(size_t count, size_t size);
+
+/* print_infor.c */
+void	*debug_infor(void *addr, size_t size, char *type);
+void	show_alloc_mem(void);
+void	show_alloc_mem_ex(void);
+
+/* allocate_zone.c */
+int		allocate_zone(t_zone *zone, int type, size_t size);
 #endif
