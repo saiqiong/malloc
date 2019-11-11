@@ -65,7 +65,7 @@ void	show_alloc_mem(void)
 	}
 	ft_printf("Total : %zu bytes\n", total);
 }
-
+#include <unistd.h>
 void	show_alloc_mem_ex(void)
 {
 	int		i;
@@ -77,10 +77,12 @@ void	show_alloc_mem_ex(void)
 	type = "TINY";
 	while (++i < MAP_NUMBER)
 	{
+		ft_printf("i =%d\n", i);
 		if (i)
 			type = (i == 1 ? "SMALL" : "LARGE");
-		if (g_map[i].zone)
+		if ((g_map + i)->zone)
 		{
+			write(1, "ex ex66666\n", 11);
 			ft_printf("%s : %p\n", type, g_map[i].zone->addr);
 			list = (g_map[i].zone)->block_list;
 			while (list)

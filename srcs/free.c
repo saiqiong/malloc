@@ -49,8 +49,7 @@ void	free_zone(t_block *block)
 	if (!cp->is_free && (*(cp->addr - 1) & BEGIN_AND_END) == BEGIN_AND_END)
 	{
 		zone = (t_zone *)(cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
-		if (!((zone->type == TINY || zone->type == SMALL) && \
-		!zone->pre && !zone->next))
+		if (!(!zone->pre && !zone->next))
 		{
 			if (!zone->pre)
 			{
@@ -69,48 +68,45 @@ void	free_zone(t_block *block)
 	}
 }
 
-int		find_addree(void *addr)
+#include <unistd.h>
+int		find_address(void *addr)
 {
 	int i = 0;
 	t_block *list;
 
-	ft_printf("Find adddr start %p\n", addr);
 	while (i < 3)
 	{
-		ft_printf("I -- >> %d\n", i);
-		ft_printf("gmap[%d]\n", g_map[i]);
-		ft_printf("gmap[%d]->zone %p\n", g_map[i].zone);
 		if((g_map[i].zone) == NULL)
 		{
 			i++;
 			continue;
 		}
 		list = (g_map[i].zone)->block_list;
-		ft_printf("inside while\n");
+	//	ft_printf("inside while\n");
 		while (list)
 		{
-			ft_printf("Second while >> \n");
-			if (list->addr == addr)
+		//	ft_printf("Second while >> \n");
+			if (list->addr == (char *)addr)
 				return 1;
-			ft_printf("------list  list->next\n");			
+		//	ft_printf("------list  list->next\n");
 			list = list->next;
-			// ft_printf("list %p, list->next\", list);
+			//ft_printf("list %p, list->next\", list);
 		}
 		i++;
 	}
-	ft_printf("Find adddr end %p\n", addr);	
+//	ft_printf("Find adddr end %p\n", addr);
 	return (0);
 }
 void	free(void *ptr)
 {
 	t_block	*block;
 
-	// return ;
-	ft_printf("free: %p\n", ptr);
+	return ;
+//	ft_printf("free: %p\n", ptr);
 	pthread_mutex_lock(&g_map_mutex);
 	//check if ptr was allocated
-	// if (ptr)
-	if (find_addree(ptr))
+	 //if (ptr)
+	if (find_address(ptr))
 	{
 		block = (t_block *)((char *)ptr - METABLOCK_SIZE);
 		if (block && block->is_free == USED)
@@ -120,10 +116,10 @@ void	free(void *ptr)
 			merge_free(block);
 			free_zone(block);
 		}
-		else
-			debug_infor(NULL, 0, "Free");
+	//	else
+	//		debug_infor(NULL, 0, "Free");
 	}
-	else
-		debug_infor(NULL, 0, "Free");
+	//else
+	//debug_infor(NULL, 0, "Free");
 	pthread_mutex_unlock(&g_map_mutex);
 }

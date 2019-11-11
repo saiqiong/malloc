@@ -30,8 +30,8 @@
 # define NOT_BEGIN 254
 # define NOT_END 253
 # define BEGIN_AND_END 3
-# define MAX_TINY_BLOCK 256
-# define MAX_SMALL_BLOCK 2048
+# define MAX_TINY_BLOCK 954
+# define MAX_SMALL_BLOCK 4480
 # define ALIGHN(size) size % 16 ? (size_t)(size + 16 - (size % 16)) : size
 
 typedef struct s_block
@@ -69,6 +69,7 @@ t_map g_map[MAP_NUMBER];
 
 /* free.c */
 void	free(void *ptr);
+int		find_address(void *addr);
 
 void	*malloc(size_t size);
 

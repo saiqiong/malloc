@@ -238,7 +238,7 @@ $(LIB_A): $(OBJ) $(HEADERS)
 	@printf "ranlib $(LIB_A)\n"
 
 %.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -I $(INCLUDE) -c -o  $@ $<
+	@$(CC) $(CFLAGS) -I $(INCLUDE) -c -o  $@ $<
 
 re:	 fclean
 	@make --no-print-directory

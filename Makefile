@@ -1,3 +1,4 @@
+
 NAME            := libft_malloc.so
 
 ifeq ($(HOSTTYPE),)
@@ -13,7 +14,7 @@ SRCS_FILES      :=  malloc.c\
 					free.c\
 					print_infor.c\
 					allocate_zone.c\
-					realloc.c\
+					realloc.c
 
 HEADERS_FILES   :=  malloc.h\
 
@@ -27,9 +28,9 @@ INCLUDES_PATH   := includes/
 INCLUDES        := -I $(INCLUDES_PATH)
 HEADERS         := $(addprefix $(INCLUDES_PATH), $(HEADERS_FILES))
 
-LIBFT_PATH      := libft/
+LIBFT_PATH      := libft
 LIBFT_INCLUDES  := -I libft/include
-LIBFT           := -L $(LIBFT_PATH) -lft
+LIBFT           := -L $(LIBFT_PATH)/lib -lft
 
 # LIBFTPRINTF_PATH = libft/ft_printf
 # LIBFTPRINTF_INCLUDE = -I$(LIBFTPRINTF_PATH)/includes
@@ -44,7 +45,7 @@ all: libft $(NAME)
 libft:
 	@make -C $(LIBFT_PATH)
 
-$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/libft.a
+$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/lib/libft.a
 	@mkdir $(OBJS_PATH) 2> /dev/null || true
 	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
 
