@@ -43,10 +43,10 @@ void	seperate_block(t_block *fit_block, size_t size)
 	rest = (t_block *)(fit_block->addr + size);
 	rest->addr = fit_block->addr + size + METABLOCK_SIZE;
 	rest->size = fit_block->size - size - METABLOCK_SIZE;
+	rest->begin = 0;
+	rest->end = fit_block->end;
 	fit_block->size = size;
-	*(rest->addr - 1) = *(fit_block->addr - 1);
-	*(fit_block->addr - 1) = *(fit_block->addr - 1) & NOT_END;
-	*(rest->addr - 1) = *(rest->addr - 1) & NOT_BEGIN;
+	fit_block->end = 0;
 	fit_block->is_free = USED;
 	fit_block->next = rest;
 	rest->pre = fit_block;
@@ -110,7 +110,5 @@ void	*malloc(size_t size)
 
 	res = allocate_in_block(g_map[malloc_type].zone, ALIGHN(size), malloc_type);
 	pthread_mutex_unlock(&g_map_mutex);
-	// show_alloc_mem_ex();
-
 	return(res);
 }

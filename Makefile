@@ -23,7 +23,7 @@ SRCS            := $(addprefix $(SRCS_PATH), $(SRCS_FILES))
 
 OBJS_PATH       := objs/
 OBJS            := $(addprefix $(OBJS_PATH), $(SRCS_FILES:.c=.o))
-OBJ		:=	$(addsuffix .o, $(basename $(SRCS)))
+OBJ				:=	$(addsuffix .o, $(basename $(SRCS)))
 
 INCLUDES_PATH   := includes/
 INCLUDES        := -I $(INCLUDES_PATH)
@@ -33,22 +33,12 @@ LIBFT_PATH      := libft
 LIBFT_INCLUDES  := -I libft/include
 LIBFT           := -L $(LIBFT_PATH)/lib -lft
 
-# LIBFTPRINTF_PATH = libft/ft_printf
-# LIBFTPRINTF_INCLUDE = -I$(LIBFTPRINTF_PATH)/includes
-# LIBFTPRINTF = -L$(LIBFTPRINTF_PATH) -lftprintf
-
-
-
 .PHONY: all libft clean fclean re
 
 all: libft $(NAME)
 
 libft:
 	@make -C $(LIBFT_PATH)
-
-# $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/lib/libft.a
-# 	@mkdir $(OBJS_PATH) 2> /dev/null || true
-# 	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
 
 %.o: %.c $(HEADERS)
 	$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
@@ -63,17 +53,11 @@ clean:
 	@echo "Cleaning:\033[33m *.o\033[0m"
 	@rm -f $(OBJ)
 	@rmdir $(OBJS_PATH) 2> /dev/null || true
-	# @make -C $(LIBFT_PATH) clean
+	@make -C $(LIBFT_PATH) clean
 
 fclean: clean
 	@echo "Cleaning:\033[33m $(NAME)\033[0m"
-#	@make fclean -C ./tests
-	# @make fclean -C $(LIBFT_PATH)
+	@make fclean -C $(LIBFT_PATH)
 	@rm -f $(NAME) ${FULLNAME} $(STATICNAME)
 
 re: fclean all
-
-#test: all
-#	@ar rc $(STATICNAME) $(LIBFT_PATH)objs/*.o $(OBJS)
-#	@ranlib $(STATICNAME)
-#	@make test -C ./tests

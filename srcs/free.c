@@ -13,7 +13,7 @@
 #include <sys/mman.h>
 #include "../includes/malloc.h"
 
-void	merge_free(t_block *list)
+t_block *merge_free(t_block *list)
 {
 	t_block *temp;
 
@@ -22,35 +22,36 @@ void	merge_free(t_block *list)
 		temp = list->next;
 		list->pre->size = list->pre->size + METABLOCK_SIZE + list->size;
 		list->pre->next = temp;
-		*(list->pre->addr - 1) = (*(list->pre->addr - 1)\
-		& NOT_END) | (*(list->addr - 1) & END);
+		list->pre->end = list->end;
 		if (temp)
 			temp->pre = list->pre;
 		list = list->pre;
 	}
 	if (list->next && list->next->is_free == FREE)
 	{
-		temp = list->next->next; // list->next
+		temp = list->next->next;
 		list->size = list->size + METABLOCK_SIZE + list->next->size;
-		*(list->addr - 1) = (*(list->addr - 1) & NOT_END)\
-			| (*(list->next->addr - 1) & END);
+		list->end = list->next->end;
 		list->next = temp;
 		if (temp)
 			temp->pre = list;
 	}
+	return (list);
 }
 
-void	free_zone(t_block *block)
+void free_zone(t_block *block)
 {
-	t_block	*cp;
-	t_zone	*zone;
+	t_block *cp;
+	t_zone *zone;
 
 	cp = block->pre ? block->pre : block;
-	if (!cp->is_free && (*(cp->addr - 1) & BEGIN_AND_END) == BEGIN_AND_END)
+	if (cp->is_free == FREE && cp->begin && cp->end)
 	{
-		zone = (t_zone *)(cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
-		if (!(!zone->pre && !zone->next))
-		{
+		zone = (t_zone *)((char *)cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
+		// printf("cp->begin=%d cp->end=%d\n", cp->begin, cp->end);
+		// if (zone && !(!zone->pre && !zone->next))
+		// {
+			// ft_printf("zone is %p\n", zone);
 			if (!zone->pre)
 			{
 				(g_map + zone->type)->zone = zone->next;
@@ -64,19 +65,18 @@ void	free_zone(t_block *block)
 					zone->next->pre = zone->pre;
 			}
 			munmap(zone, cp->size + METAZONE_SIZE + METABLOCK_SIZE);
-		}
+		// }
 	}
 }
 
-#include <unistd.h>
-int		find_address(void *addr)
+int find_address(void *addr)
 {
 	int i = 0;
 	t_block *list;
 
 	while (i < MAP_NUMBER)
 	{
-		if((g_map[i].zone) == NULL)
+		if ((g_map[i].zone) == NULL)
 		{
 			i++;
 			continue;
@@ -85,18 +85,20 @@ int		find_address(void *addr)
 		while (list)
 		{
 			if (list->addr == (char *)addr)
+			{
 				return (1);
+			}
 			list = list->next;
 		}
 		i++;
 	}
 	return (0);
 }
-void	free(void *ptr)
-{
-	t_block	*block;
 
-	// return;
+void free(void *ptr)
+{
+	t_block *block;
+
 	pthread_mutex_lock(&g_map_mutex);
 	if (ptr && find_address(ptr))
 	{
@@ -104,8 +106,8 @@ void	free(void *ptr)
 		if (block && block->is_free == USED)
 		{
 			block->is_free = FREE;
-			// merge_free(block);
-			// free_zone(block);
+			block = merge_free(block);
+			free_zone(block);
 		}
 	}
 	pthread_mutex_unlock(&g_map_mutex);

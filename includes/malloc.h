@@ -29,8 +29,8 @@
 # define NOT_BEGIN 254
 # define NOT_END 253
 # define BEGIN_AND_END 3
-# define MAX_TINY_BLOCK 960
-# define MAX_SMALL_BLOCK 4000
+# define MAX_TINY_BLOCK 256
+# define MAX_SMALL_BLOCK 3088
 # define ALIGN_BYTE 16
 # define ALIGHN(size) size % ALIGN_BYTE ? (size_t)(size + ALIGN_BYTE - (size % ALIGN_BYTE)) : size
 
@@ -40,7 +40,10 @@ typedef struct s_block
 	struct s_block 	*next;
 	struct s_block 	*pre;
 	size_t		size;
-	char		*test;
+	int		begin;
+	int		end;
+	// int			test;
+	// char		*test;
 	int		is_free;
 }		t_block;
 

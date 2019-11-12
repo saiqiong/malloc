@@ -18,9 +18,15 @@ typedef struct s_test
 int main()
 {
 
-	t_test test;
+	t_block a;
 
-	ft_printf(" c : %p -:- *c :%p", &(test.c), *((test.e) - 1));
+	char *test = malloc(3089);
+	char *test2 = malloc(3089);
+	free(test);
+
+	show_alloc_mem_ex();
+
+	// ft_printf(" c : %p -:- *c :%p", &(test.c), *((test.e) - 1));
 // char *str, *ptr;
 // 	if (!(str = malloc(10)))
 // 		exit (128);
@@ -39,7 +45,6 @@ int main()
 // char *test = malloc(10);
 // char *test1 = malloc(50);
 // char *test2 = malloc(60);
-// 	show_alloc_mem_ex();
 // free(test);
 // free(test1);
 // realloc(test2, 5096);
