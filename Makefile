@@ -12,7 +12,7 @@ FLAGS           := -Wall -Wextra -Werror -g3
 
 SRCS_FILES      :=  malloc.c\
 					free.c\
-					print_infor.c\
+					helper.c\
 					allocate_zone.c\
 					realloc.c
 
@@ -23,6 +23,7 @@ SRCS            := $(addprefix $(SRCS_PATH), $(SRCS_FILES))
 
 OBJS_PATH       := objs/
 OBJS            := $(addprefix $(OBJS_PATH), $(SRCS_FILES:.c=.o))
+OBJ		:=	$(addsuffix .o, $(basename $(SRCS)))
 
 INCLUDES_PATH   := includes/
 INCLUDES        := -I $(INCLUDES_PATH)
@@ -45,25 +46,29 @@ all: libft $(NAME)
 libft:
 	@make -C $(LIBFT_PATH)
 
-$(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/lib/libft.a
-	@mkdir $(OBJS_PATH) 2> /dev/null || true
-	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
+# $(OBJS_PATH)%.o: $(SRCS_PATH)%.c $(HEADERS) $(LIBFT_PATH)/lib/libft.a
+# 	@mkdir $(OBJS_PATH) 2> /dev/null || true
+# 	@$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
 
-$(NAME): $(OBJS)
-	@$(CC) -shared $(OBJS) $(FLAGS) -o $(FULLNAME) $(LIBFT)
+%.o: %.c $(HEADERS)
+	$(CC) $(FLAGS) $(INCLUDES) $(LIBFT_INCLUDES) -o $@ -c $<
+
+
+$(NAME): $(OBJ)
+	@$(CC) -shared $(OBJ) $(FLAGS) -o $(FULLNAME) $(LIBFT)
 	@ln -fs $(FULLNAME) $@
 	@echo "$(NAME):\033[92m linked\033[0m"
 
 clean:
 	@echo "Cleaning:\033[33m *.o\033[0m"
-	@rm -f $(OBJS)
+	@rm -f $(OBJ)
 	@rmdir $(OBJS_PATH) 2> /dev/null || true
-	@make -C $(LIBFT_PATH) clean
+	# @make -C $(LIBFT_PATH) clean
 
 fclean: clean
 	@echo "Cleaning:\033[33m $(NAME)\033[0m"
 #	@make fclean -C ./tests
-	@make fclean -C $(LIBFT_PATH)
+	# @make fclean -C $(LIBFT_PATH)
 	@rm -f $(NAME) ${FULLNAME} $(STATICNAME)
 
 re: fclean all

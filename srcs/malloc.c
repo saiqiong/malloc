@@ -87,20 +87,6 @@ void	*allocate_in_block(t_zone *zone, size_t size, int type)
 	}
 }
 
-#include <stdio.h>
-
-void init_g_map()
-{
-	int i;
-
-	i = 0;
-	while(i != MAP_NUMBER)
-	{
-		(g_map + i)->zone = NULL;
-		i++;
-	}
-}
-
 void	*malloc(size_t size)
 {
 	int		malloc_type;
@@ -114,7 +100,6 @@ void	*malloc(size_t size)
 
 	}
 
-	//ft_printf("-->> Size: %zu\n", size);
 	if (size <= MAX_TINY_BLOCK)
 		malloc_type = TINY;
 	else if (size <= MAX_SMALL_BLOCK)
@@ -125,9 +110,7 @@ void	*malloc(size_t size)
 
 	res = allocate_in_block(g_map[malloc_type].zone, ALIGHN(size), malloc_type);
 	pthread_mutex_unlock(&g_map_mutex);
-	//ft_printf("-->> %p\n\n", res);
 	// show_alloc_mem_ex();
 
-	// return (debug_infor(res, ((t_block *)((char *)res - METABLOCK_SIZE))->size, "Malloced"));
 	return(res);
 }

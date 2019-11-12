@@ -15,10 +15,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stddef.h>
-// #include "../libft/include/libft.h"
-// #include "../libft/include/ft_printf.h"
-#include "../libft/libft.h"
-// #include "../libft/include/ft_printf.h"
+#include "../libft/include/libft.h"
+#include "../libft/include/ft_printf.h"
 
 # define FREE 0
 # define USED 1
@@ -32,7 +30,7 @@
 # define NOT_END 253
 # define BEGIN_AND_END 3
 # define MAX_TINY_BLOCK 960
-# define MAX_SMALL_BLOCK 4480
+# define MAX_SMALL_BLOCK 4000
 # define ALIGN_BYTE 16
 # define ALIGHN(size) size % ALIGN_BYTE ? (size_t)(size + ALIGN_BYTE - (size % ALIGN_BYTE)) : size
 
@@ -73,6 +71,7 @@ t_map g_map[MAP_NUMBER];
 void	free(void *ptr);
 int		find_address(void *addr);
 
+/*malloc.c */
 void	*malloc(size_t size);
 
 /* realloc.c */
@@ -80,8 +79,8 @@ void	*realloc(void *ptr, size_t size);
 void	*reallocf(void *ptr, size_t size);
 void	*calloc(size_t count, size_t size);
 
-/* print_infor.c */
-void	*debug_infor(void *addr, size_t size, char *type);
+/* helper.c */
+void	init_g_map(void);
 void	show_alloc_mem(void);
 void	show_alloc_mem_ex(void);
 

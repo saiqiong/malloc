@@ -30,7 +30,7 @@ void	merge_free(t_block *list)
 	}
 	if (list->next && list->next->is_free == FREE)
 	{
-		temp = list->next->next;
+		temp = list->next->next; // list->next
 		list->size = list->size + METABLOCK_SIZE + list->next->size;
 		*(list->addr - 1) = (*(list->addr - 1) & NOT_END)\
 			| (*(list->next->addr - 1) & END);
@@ -74,7 +74,7 @@ int		find_address(void *addr)
 	int i = 0;
 	t_block *list;
 
-	while (i < 3)
+	while (i < MAP_NUMBER)
 	{
 		if((g_map[i].zone) == NULL)
 		{
@@ -82,44 +82,31 @@ int		find_address(void *addr)
 			continue;
 		}
 		list = (g_map[i].zone)->block_list;
-	//	ft_printf("inside while\n");
 		while (list)
 		{
-		//	ft_printf("Second while >> \n");
 			if (list->addr == (char *)addr)
-				return 1;
-		//	ft_printf("------list  list->next\n");
+				return (1);
 			list = list->next;
-			//ft_printf("list %p, list->next\", list);
 		}
 		i++;
 	}
-//	ft_printf("Find adddr end %p\n", addr);
 	return (0);
 }
 void	free(void *ptr)
 {
 	t_block	*block;
 
-	return ;
-//	ft_printf("free: %p\n", ptr);
+	// return;
 	pthread_mutex_lock(&g_map_mutex);
-	//check if ptr was allocated
-	 //if (ptr)
-	if (find_address(ptr))
+	if (ptr && find_address(ptr))
 	{
 		block = (t_block *)((char *)ptr - METABLOCK_SIZE);
 		if (block && block->is_free == USED)
 		{
-			debug_infor(block->addr, block->size, "Freed");
 			block->is_free = FREE;
-			merge_free(block);
-			free_zone(block);
+			// merge_free(block);
+			// free_zone(block);
 		}
-	//	else
-	//		debug_infor(NULL, 0, "Free");
 	}
-	//else
-	//debug_infor(NULL, 0, "Free");
 	pthread_mutex_unlock(&g_map_mutex);
 }

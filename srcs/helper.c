@@ -10,22 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdlib.h>
 #include "../includes/malloc.h"
 
-void	*debug_infor(void *addr, size_t size, char *type)
+void init_g_map(void)
 {
-	char *debug_env;
+	int i;
 
-	debug_env = getenv("MALLOCDEBUG");
-	if (debug_env && (!ft_strcmp(debug_env, "true") \
-		|| !ft_strcmp(debug_env, "TRUE")))
+	i = 0;
+	while(i != MAP_NUMBER)
 	{
-		if (!addr)
-			ft_printf("Opps! %s failed\n", type);
-		else
-			ft_printf("%s from address: %p %zu bytes\n", type, addr, size);
+		(g_map + i)->zone = NULL;
+		i++;
 	}
-	return (addr);
 }
 
 void	print_block(t_block *list, size_t *total)
@@ -65,7 +62,7 @@ void	show_alloc_mem(void)
 	}
 	ft_printf("Total : %zu bytes\n", total);
 }
-#include <unistd.h>
+
 void	show_alloc_mem_ex(void)
 {
 	int		i;
@@ -77,12 +74,10 @@ void	show_alloc_mem_ex(void)
 	type = "TINY";
 	while (++i < MAP_NUMBER)
 	{
-		ft_printf("i =%d\n", i);
 		if (i)
 			type = (i == 1 ? "SMALL" : "LARGE");
 		if ((g_map + i)->zone)
 		{
-			write(1, "ex ex66666\n", 11);
 			ft_printf("%s : %p\n", type, g_map[i].zone->addr);
 			list = (g_map[i].zone)->block_list;
 			while (list)
