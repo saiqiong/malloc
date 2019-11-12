@@ -48,10 +48,8 @@ void free_zone(t_block *block)
 	if (cp->is_free == FREE && cp->begin && cp->end)
 	{
 		zone = (t_zone *)((char *)cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
-		// printf("cp->begin=%d cp->end=%d\n", cp->begin, cp->end);
-		// if (zone && !(!zone->pre && !zone->next))
-		// {
-			// ft_printf("zone is %p\n", zone);
+		if (zone && !((zone->type == TINY || zone->type == SMALL) && !zone->pre && !zone->next))
+		{
 			if (!zone->pre)
 			{
 				(g_map + zone->type)->zone = zone->next;
@@ -65,7 +63,7 @@ void free_zone(t_block *block)
 					zone->next->pre = zone->pre;
 			}
 			munmap(zone, cp->size + METAZONE_SIZE + METABLOCK_SIZE);
-		// }
+		}
 	}
 }
 
