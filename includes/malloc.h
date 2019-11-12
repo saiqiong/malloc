@@ -15,9 +15,10 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stddef.h>
-#include "../libft/include/libft.h"
-#include "../libft/include/ft_printf.h"
-
+// #include "../libft/include/libft.h"
+// #include "../libft/include/ft_printf.h"
+#include "../libft/libft.h"
+// #include "../libft/include/ft_printf.h"
 
 # define FREE 0
 # define USED 1
@@ -30,9 +31,10 @@
 # define NOT_BEGIN 254
 # define NOT_END 253
 # define BEGIN_AND_END 3
-# define MAX_TINY_BLOCK 954
+# define MAX_TINY_BLOCK 960
 # define MAX_SMALL_BLOCK 4480
-# define ALIGHN(size) size % 16 ? (size_t)(size + 16 - (size % 16)) : size
+# define ALIGN_BYTE 16
+# define ALIGHN(size) size % ALIGN_BYTE ? (size_t)(size + ALIGN_BYTE - (size % ALIGN_BYTE)) : size
 
 typedef struct s_block
 {
@@ -75,6 +77,7 @@ void	*malloc(size_t size);
 
 /* realloc.c */
 void	*realloc(void *ptr, size_t size);
+void	*reallocf(void *ptr, size_t size);
 void	*calloc(size_t count, size_t size);
 
 /* print_infor.c */
