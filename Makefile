@@ -8,7 +8,7 @@ FULLNAME		:= libft_malloc_$(HOSTTYPE).so
 STATICNAME		:= libft_malloc_static.a
 
 CC              := gcc
-FLAGS           := -Wall -Wextra -Werror -g3
+FLAGS           := -Wall -Wextra -Werror
 
 SRCS_FILES      :=  malloc.c\
 					free.c\
@@ -23,7 +23,7 @@ SRCS            := $(addprefix $(SRCS_PATH), $(SRCS_FILES))
 
 OBJS_PATH       := objs/
 OBJS            := $(addprefix $(OBJS_PATH), $(SRCS_FILES:.c=.o))
-OBJ				:=	$(addsuffix .o, $(basename $(SRCS)))
+OBJ				:= $(addsuffix .o, $(basename $(SRCS)))
 
 INCLUDES_PATH   := includes/
 INCLUDES        := -I $(INCLUDES_PATH)
