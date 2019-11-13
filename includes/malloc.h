@@ -24,11 +24,6 @@
 # define TINY 0
 # define SMALL 1
 # define LARGE 2
-# define BEGIN 1 // mark a block if it's beginning of a zone
-# define END 2 // mark a block if it's end of a zone
-# define NOT_BEGIN 254
-# define NOT_END 253
-# define BEGIN_AND_END 3
 # define MAX_TINY_BLOCK 256
 # define MAX_SMALL_BLOCK 3088
 # define ALIGN_BYTE 16
@@ -42,8 +37,6 @@ typedef struct s_block
 	size_t		size;
 	int		begin;
 	int		end;
-	// int			test;
-	// char		*test;
 	int		is_free;
 }		t_block;
 
@@ -53,7 +46,7 @@ typedef struct s_zone
 	struct 	s_zone *next;
 	struct	s_zone *pre;
 	t_block *block_list;
-	char	*test;
+	char	*place_holder;;
 	int		type;
 }		t_zone;
 
@@ -66,7 +59,6 @@ typedef struct s_map
 #define METAZONE_SIZE sizeof(t_zone)
 
 static pthread_mutex_t g_map_mutex = PTHREAD_MUTEX_INITIALIZER;
-// static t_map g_map[MAP_NUMBER] = {(const t_map) {0}, (const t_map){0}, (const t_map){0}};
 t_map g_map[MAP_NUMBER];
 
 
