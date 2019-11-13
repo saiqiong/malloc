@@ -13,7 +13,7 @@
 #include <sys/mman.h>
 #include "../includes/malloc.h"
 
-t_block *merge_free(t_block *list)
+t_block	*merge_free(t_block *list)
 {
 	t_block *temp;
 
@@ -39,16 +39,17 @@ t_block *merge_free(t_block *list)
 	return (list);
 }
 
-void free_zone(t_block *block)
+void	free_zone(t_block *block)
 {
-	t_block *cp;
-	t_zone *zone;
+	t_block	*cp;
+	t_zone	*zone;
 
 	cp = block->pre ? block->pre : block;
 	if (cp->is_free == FREE && cp->begin && cp->end)
 	{
 		zone = (t_zone *)((char *)cp->addr - METABLOCK_SIZE - METAZONE_SIZE);
-		if (zone && !((zone->type == TINY || zone->type == SMALL) && !zone->pre && !zone->next))
+		if (zone && !((zone->type == TINY || zone->type == SMALL) && \
+		!zone->pre && !zone->next))
 		{
 			if (!zone->pre)
 			{
@@ -67,11 +68,12 @@ void free_zone(t_block *block)
 	}
 }
 
-int find_address(void *addr)
+int		find_address(void *addr)
 {
-	int i = 0;
-	t_block *list;
+	int		i;
+	t_block	*list;
 
+	i = 0;
 	while (i < MAP_NUMBER)
 	{
 		if ((g_map[i].zone) == NULL)
@@ -83,9 +85,7 @@ int find_address(void *addr)
 		while (list)
 		{
 			if (list->addr == (char *)addr)
-			{
 				return (1);
-			}
 			list = list->next;
 		}
 		i++;
@@ -93,7 +93,7 @@ int find_address(void *addr)
 	return (0);
 }
 
-void free(void *ptr)
+void	free(void *ptr)
 {
 	t_block *block;
 

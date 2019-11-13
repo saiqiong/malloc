@@ -13,12 +13,12 @@
 #include <stdlib.h>
 #include "../includes/malloc.h"
 
-void init_g_map(void)
+void	init_g_map(void)
 {
 	int i;
 
 	i = 0;
-	while(i != MAP_NUMBER)
+	while (i != MAP_NUMBER)
 	{
 		(g_map + i)->zone = NULL;
 		i++;

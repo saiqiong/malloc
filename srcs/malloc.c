@@ -89,17 +89,15 @@ void	*allocate_in_block(t_zone *zone, size_t size, int type)
 
 void	*malloc(size_t size)
 {
-	int		malloc_type;
-	void	*res;
+	int			malloc_type;
+	void		*res;
+	static int	init = 0;
 
-	static int init = 0;
-	if(init == 0)
+	if (init == 0)
 	{
 		init_g_map();
 		init = 1;
-
 	}
-
 	if (size <= MAX_TINY_BLOCK)
 		malloc_type = TINY;
 	else if (size <= MAX_SMALL_BLOCK)
@@ -107,8 +105,7 @@ void	*malloc(size_t size)
 	else
 		malloc_type = LARGE;
 	pthread_mutex_lock(&g_map_mutex);
-
 	res = allocate_in_block(g_map[malloc_type].zone, ALIGHN(size), malloc_type);
 	pthread_mutex_unlock(&g_map_mutex);
-	return(res);
+	return (res);
 }

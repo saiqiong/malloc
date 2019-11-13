@@ -28,12 +28,12 @@ void	connect_block(t_zone *zone, t_zone *next)
 
 size_t	to_pagesize(size_t size)
 {
-	size_t res;
-	int power;
+	size_t	res;
+	int		power;
 
 	power = size / getpagesize();
 	if (!power)
-		return getpagesize();
+		return (getpagesize());
 	res = size % getpagesize() ? \
 	size + getpagesize() - (size % getpagesize()) : size;
 	return (res);
@@ -41,8 +41,8 @@ size_t	to_pagesize(size_t size)
 
 size_t	calculate_zone_size(int type, size_t size)
 {
-	int max_block;
-	size_t zone_size;
+	int		max_block;
+	size_t	zone_size;
 
 	if (type == LARGE)
 		zone_size = to_pagesize(size + METABLOCK_SIZE + METAZONE_SIZE);
@@ -52,35 +52,37 @@ size_t	calculate_zone_size(int type, size_t size)
 			max_block = MAX_TINY_BLOCK;
 		else
 			max_block = MAX_SMALL_BLOCK;
-		zone_size = to_pagesize((max_block + METABLOCK_SIZE) * 100 + METAZONE_SIZE);
+		zone_size = to_pagesize((max_block + METABLOCK_SIZE) * 100\
+		+ METAZONE_SIZE);
 	}
 	return (zone_size);
 }
 
-void	init_new_zone(t_zone *new_zone, char *address, size_t zone_size, int type)
+void	init_new_zone(t_zone *new, char *address, size_t zone_size, int type)
 {
-	new_zone->addr = address + METAZONE_SIZE;
-	new_zone->next = NULL;
-	new_zone->pre = NULL;
-	new_zone->block_list = (t_block *)(address + METAZONE_SIZE);
-	new_zone->block_list->addr = address + METABLOCK_SIZE + METAZONE_SIZE;
-	new_zone->block_list->begin = 1;
-	new_zone->block_list->end = 1;
-	new_zone->block_list->next = NULL;
-	new_zone->block_list->pre = NULL;
-	new_zone->block_list->size = zone_size - METABLOCK_SIZE - METAZONE_SIZE;
-	new_zone->block_list->is_free = FREE;
-	new_zone->type = type;
+	new->addr = address + METAZONE_SIZE;
+	new->next = NULL;
+	new->pre = NULL;
+	new->block_list = (t_block *)(address + METAZONE_SIZE);
+	new->block_list->addr = address + METABLOCK_SIZE + METAZONE_SIZE;
+	new->block_list->begin = 1;
+	new->block_list->end = 1;
+	new->block_list->next = NULL;
+	new->block_list->pre = NULL;
+	new->block_list->size = zone_size - METABLOCK_SIZE - METAZONE_SIZE;
+	new->block_list->is_free = FREE;
+	new->type = type;
 }
 
 int		allocate_zone(t_zone *zone, int type, size_t size)
 {
-	size_t zone_size;
-	char *address;
-	t_zone *new_zone;
+	size_t	zone_size;
+	char	*address;
+	t_zone	*new_zone;
 
 	zone_size = calculate_zone_size(type, size);
-	address = mmap(0, zone_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	address = mmap(0, zone_size, \
+	PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if (address == MAP_FAILED)
 		return (1);
 	new_zone = (t_zone *)address;
